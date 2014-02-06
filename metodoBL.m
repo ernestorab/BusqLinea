@@ -1,4 +1,4 @@
-function [ x, iter ] = metodoBL( fname,x )
+function [ x, iter ] = metodoBL( fname,x, tipo_descenso )
 % Método de Búsqueda de Línea con la primer condición de Wolfe
 % usando máximo descenso.
 % 
@@ -12,9 +12,9 @@ function [ x, iter ] = metodoBL( fname,x )
 % Se requieren aproximaciones al gradiente de la función
 
 % parámetros
-tol = 1.e-05;   %tolerancia para la norma del gradiente
+tol = 1.e-08;   %tolerancia para la norma del gradiente
 c1 = 1.e-04;       %valor para la condición de Wolfe
-maxiter = 20;  %número máximo de iteraciones externas permitidas
+maxiter = 50;  %número máximo de iteraciones externas permitidas
 
 %valores iniciales
 iter = 0;       %contador para las iteraciones externas
@@ -25,15 +25,19 @@ ng = norm(g);
 %parte iterativa
 while ( ng > tol && iter < maxiter)
     H = hessiana(fname,x);
-    p = -H\g;                   %dirección de Newton
-    %p = -g;                    %máximo descenso
+    
+    if strncmp(tipo_descenso,'MaxD',4)
+        p = -g;                    %máximo descenso
+    else %strncmp(tipo_descenso,'Newton',6)
+        p = -H\g;                  %dirección de Newton
+    end
     
     %graficación
-    t = linspace(0,1,30)';
+    z = linspace(0,1,30)';
     for k = 1:30
-        y(k) = feval(fname, x+t(k)*p);
+        y(k) = feval(fname, x+z(k)*p);
     end
-    plot(t,y,'--b','Linewidth',3)
+    plot(z,y,'--b','Linewidth',3)
     pause(1)
     close all
     
@@ -42,9 +46,12 @@ while ( ng > tol && iter < maxiter)
     
     x = x + t*p;
     iter = iter +1;
+    
+    g = gradiente(fname,x);
     ng = norm(g);
 end
 
 
 end
+
 
