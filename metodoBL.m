@@ -21,9 +21,17 @@ iter = 0;       %contador para las iteraciones externas
 
 g = gradiente(fname,x);
 ng = norm(g);
+ng2=ng;
 
 %parte iterativa
 while ( ng > tol && iter < maxiter)
+    
+    if(ng<sqrt(tol) && abs(ng2-ng)<sqrt(tol))
+        break;
+    end
+    
+    ng2=ng;
+    
     H = hessiana(fname,x);
     
     if strncmp(tipo_descenso,'MaxD',4)
@@ -48,10 +56,9 @@ while ( ng > tol && iter < maxiter)
     iter = iter +1;
     
     g = gradiente(fname,x);
-    ng = norm(g);
+    ng = norm(g)
 end
 
 
 end
-
 
