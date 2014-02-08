@@ -1,4 +1,4 @@
-function [ t] = BacktrakingRazondorada( fname,x, g, c1, p)
+function [ t ] = BacktrackingRazondorada( fname, x, g, c1, p)
 tol=1.e-08;
 
 t=1;
@@ -11,35 +11,19 @@ while(g1 > g0 + t*c1*gprima0)
     b=t;
     r = (3 - sqrt(5))/2;
 
-    c = a + r*(b-a);
-    d = a + (1-r)*(b-a);
-
-    fc = feval(fname, x + c*p);
-    fd = feval(fname, x + d*p);
-
-
-    while(d - c)> tol*max(abs(c), abs(d))
-
-        if fc >= fd
-            z = c + (1-r)*(b-c);
-            %[a c d b] <- [c d z b]
-            a = c;
-            c = d;
-            fc = fd;
-            d = z;
-            fd = feval(fname, x+z*p);
-        else
-            z = a + r*(b-a);
-            %[a c d b ] <- [a z c d]
-            b = d;
-            d = c;
-            fd=fc;
-            c = z;
-            fd = feval(fname, x+z*p);
-        end
+    while ((b-a)>tol)
+    c=a+r*(b-a);
+    d=a+(1-r)*(b-a);
+    
+    if(feval(fname,x+c*p)<=feval(fname,x+d*p))
+        b=d;
+    else
+        a=c;
     end
-
-    t = (c+d)/2;
+    
+    
+    end
+    t=(a+b)/2;
     
     if t<0.1
         t=0.1;
