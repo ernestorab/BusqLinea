@@ -1,7 +1,9 @@
 function [ t ] = BacktrakingInterpolacion2( fname,g,x,c1,p )
+%Método de Backtracking por el método de Backtracking
+%DESCRIPCIÓN
 
 t=1;
-g0=feval(fname, x);
+g0=feval(fname, x);     %función evaluada
 gprima0=g'*p;
 g1=feval(fname,x+t*p);
 
