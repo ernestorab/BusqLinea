@@ -66,7 +66,7 @@ while ( ng > tol && iter < maxiter)
         y(k) = feval(fname, x+z(k)*p);
     end
     plot(z,y,'--b','Linewidth',3)
-    pause(1)
+    pause(3)
     close all
     
     %Obtenemos t con el backtracking
