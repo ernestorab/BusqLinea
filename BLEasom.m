@@ -1,4 +1,4 @@
-[x, iter] = metodoBL('rosenbrock',[2;2],'N','I');
+[x, iter] = metodoBL('Easom',[5;5],'M','R');
 display('El punto en donde la función de Rosenbrock alcanza el mínimo es ')
 x
 display('El valor de la función de Rosenbrock es ese punto es ')
