@@ -11,6 +11,8 @@ function [ t ] = BacktrakingInterpolacion2( fname,g,x,c1,p )
 %Out
 % t .- la t que cumple la condición de Wolfe 
 
+
+
 %DESCRIPCIÓN
 
 t=1; % valor incial de t
@@ -18,12 +20,12 @@ g0=feval(fname, x);     %función evaluada
 gprima0=g'*p;
 g1=feval(fname,x+t*p);  % función evaluada al dar el paso completo
 
-while(g1 > g0 + t*c1*gprima0)
+while(g1 > g0 + t*c1*gprima0) % primera condición de Wolfe
     
-    g1=feval(fname,x+t*p);
-    t=-(gprima0*t^2) /(2*(g1-t*gprima0-g0));
+    g1=feval(fname,x+t*p);% evaluamos en punto x+t*p
+    t=-(gprima0*t^2) /(2*(g1-t*gprima0-g0)); % se actualiza el valor de t
     
-    if t<0.1
+    if t<0.1   % condición de t para que no de pasos tan cortos
         t=0.1;
         break;
     end
