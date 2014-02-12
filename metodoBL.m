@@ -12,7 +12,7 @@ function [ x, iter ] = metodoBL( fname,x, tipo_descenso, backtracking)
 % Se requieren aproximaciones al gradiente de la función
 
 % parámetros
-tol = 1.e-08;   %tolerancia para la norma del gradiente
+tol = 1.e-06;   %tolerancia para la norma del gradiente
 c1 = 1.e-04;       %valor para la condición de Wolfe
 maxiter = 50;  %número máximo de iteraciones externas permitidas
 
@@ -21,7 +21,11 @@ iter = 0;       %contador para las iteraciones externas
 
 g = gradiente(fname,x);     %gradiente de g
 ng = norm(g);               %norma del gradiente
-ng2=ng;                     %ng2 es la norma de g en la iteración anterior
+min_ng = ng;                %norma mínima del gradiente a la que el algoritmo llegó
+x1_min_ng = x(1);           %punto inicial de norma mínima;
+x2_min_ng = x(2);
+ng2=0;                      %ng2 es la norma de g en la iteración anterior
+ng3=0;
 
 %parte iterativa.
 %condición de paro es que la norma del gradiente sea cercana a 0
@@ -31,25 +35,30 @@ while ( ng > tol && iter < maxiter)
     %Condición de paro extra:
     %Si la norma de g no cambia mucho de una iteración a otra, se llegó a
     %la solución.
-    if(ng<sqrt(tol) && abs(ng2-ng)<sqrt(tol))
+    if (iter ~= 0 & abs(ng2-ng)<sqrt(tol))
         break;
     end
     
-    %guardamos la norma de esta iteración
-    ng2=ng;
+    if (iter > 1 & abs(ng3-ng)<sqrt(tol))
+        break;
+    end
     
     %Calculamos la Hessiana de f en x
     H = hessiana(fname,x);
-    
-    %Se checa qué tipo de dirección se usará
-    if strncmp(tipo_descenso,'MaxD',4)
-        p = -g;                    %máximo descenso
-    else %strncmp(tipo_descenso,'Newton',6)
+
+    %Se escoge la dirección de descenso
+    if strncmp(tipo_descenso,'M',1)
+        p = -g/ng;                    %máximo descenso
+    elseif strncmp(tipo_descenso,'N',1)
         %Resolver H*p=-g para obtener la dirección de Newton p
         L = chol(H)';                   %factorización de Cholesky H = L*L'
         y = trin(L, -g);                %L*y = -g
         p = tris(L',y);                 %L'*p = y
     end
+    
+    %guardamos la norma de esta iteración
+    ng3=ng2;
+    ng2=ng;
     
     %graficación
     z = linspace(0,1,30)';
@@ -61,13 +70,14 @@ while ( ng > tol && iter < maxiter)
     close all
     
     %Obtenemos t con el backtracking
-    if strncmp(backtracking,'Int',4)
-        t = BacktrakingInterpolacion2( fname,g,x,c1,p );
-    else %strncmp(backtracking,'RD',6)
-        t = BacktrackingRazondorada(fname, g, x, c1, p)
+    if strncmp(backtracking,'I',1) %Interopolación
+        t = BacktrakingInterpolacion2( fname,g,x,c1,p )
+    elseif strncmp(backtracking,'R',6) %Razón dorada
+        r = 0.3 %sugerida, r entre
+        t = BacktrackingRazondorada2(fname, x, c1, p, r)
     end
     
-    %Actualizamos x
+    %Actualizamos x y el contador de iteraciones.
     x = x + t*p;
     iter = iter +1;
     
@@ -75,6 +85,20 @@ while ( ng > tol && iter < maxiter)
     %evaluación del while.
     g = gradiente(fname,x);
     ng = norm(g)
+    
+    %Checamos y guardamos el punto actual si la norma de g en este punto es
+    %la menor que se ha obtenido.
+    if ng < min_ng
+        min_ng = ng;
+        x1_min_ng = x(1);
+        x2_min_ng = x(2);
+    end
+end
+
+%Condición para obtener la mejor aproximación posible al mínimo.
+if ng > min_ng
+    x = [x1_min_ng; x2_min_ng];
+    min_ng
 end
 
 
